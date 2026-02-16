@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSS — BJJ Training Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --belt-white:   #F5F0E8;
+    --belt-yellow:  #E8C040;
+    --belt-orange:  #D4712A;
+    --belt-green:   #3A7D44;
+    --belt-blue:    #2B5FA6;
+    --belt-purple:  #6B3FA0;
+    --belt-brown:   #6B3A2A;
+    --belt-red:     #B82020;
+    --belt-black:   #1A1612;
+
+    --mat:          #1E1A16;
+    --mat-mid:      #252018;
+    --mat-light:    #2E2820;
+    --surface:      #322B22;
+    --surface-hi:   #3D3428;
+    --border:       rgba(232, 192, 64, 0.15);
+    --text:         #E8E0D0;
+    --text-dim:     #9A8F7A;
+    --text-faint:   #5A5248;
+
+    --accent:       var(--belt-yellow);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    background: var(--mat);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.018) 39px, rgba(255,255,255,0.018) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.018) 39px, rgba(255,255,255,0.018) 40px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── BELT STRIPE: white / blue / purple / brown / black only ── */
+  .belt-stripe {
+    height: 6px;
+    background: linear-gradient(to right,
+      #F5F0E8 0%   20%,
+      #2B5FA6 20%  40%,
+      #6B3FA0 40%  60%,
+      #6B3A2A 60%  80%,
+      #1A1612 80% 100%
+    );
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 1;
+    padding: 3rem 2rem 2rem;
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: flex-end;
+    justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+
+  .logo-oss {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem; line-height: 0.85; letter-spacing: 0.05em;
+    color: var(--belt-yellow);
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  }
+
+  .logo-sub {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.35em; color: var(--text-dim);
+    text-transform: uppercase; margin-top: 0.25rem;
+  }
+
+  .header-stats { display: flex; gap: 2rem; align-items: flex-end; }
+
+  .stat-pill { text-align: center; }
+  .stat-pill .num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem;
+    line-height: 1; color: var(--belt-yellow);
+  }
+  .stat-pill .lbl {
+    font-family: 'DM Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 0.25em; color: var(--text-dim); text-transform: uppercase;
+  }
+
+  /* ── NAV TABS ── */
+  .tabs-bar {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto 2rem;
+    padding: 0 2rem; display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text-dim); background: none; border: none;
+    padding: 0.85rem 1.5rem; cursor: pointer; position: relative; transition: color 0.2s;
+  }
+  .tab-btn::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: var(--belt-yellow);
+    transform: scaleX(0); transition: transform 0.25s ease;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn:hover::after, .tab-btn.active::after { transform: scaleX(1); }
+  .tab-btn.active { color: var(--belt-yellow); }
+
+  /* ── MAIN ── */
+  .main {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 0.1em; color: var(--belt-white);
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 0.65rem 1.4rem; border: 1px solid var(--belt-yellow);
+    background: transparent; color: var(--belt-yellow); cursor: pointer; transition: all 0.2s;
+  }
+  .btn:hover { background: var(--belt-yellow); color: var(--mat); }
+
+  .btn-ghost { border-color: var(--text-faint); color: var(--text-dim); }
+  .btn-ghost:hover { border-color: var(--text-dim); background: var(--surface); color: var(--text); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 999;
+    align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--mat-mid); border: 1px solid var(--border);
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 1.5rem 1.75rem 1rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.08em; color: var(--belt-yellow); }
+  .modal-close { font-family: 'DM Mono', monospace; font-size: 1.2rem; background: none; border: none; color: var(--text-dim); cursor: pointer; line-height: 1; padding: 0.25rem; transition: color 0.2s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 1.5rem 1.75rem 1.75rem; }
+
+  /* ── FORM ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim);
+  }
+
+  input, select, textarea {
+    background: var(--mat); border: 1px solid var(--surface-hi);
+    color: var(--text); font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 1rem; padding: 0.6rem 0.8rem; outline: none;
+    transition: border-color 0.2s; width: 100%; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--belt-yellow); }
+  select option { background: var(--mat); }
+  textarea { resize: vertical; min-height: 90px; }
+
+  .form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+  /* ── STAR RATING ── */
+  .star-rating { display: flex; gap: 0.3rem; flex-direction: row-reverse; justify-content: flex-end; }
+  .star-rating input { display: none; }
+  .star-rating label { font-size: 1.5rem; color: var(--text-faint); cursor: pointer; transition: color 0.15s; letter-spacing: 0; text-transform: none; padding: 0; }
+  .star-rating input:checked ~ label,
+  .star-rating label:hover,
+  .star-rating label:hover ~ label { color: var(--belt-yellow); }
+
+  /* ── ENTRY CARDS ── */
+  .entries-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .entry-card {
+    background: var(--mat-mid); border: 1px solid var(--surface);
+    border-left: 4px solid var(--belt-blue);
+    padding: 1.1rem 1.4rem;
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 0 1.5rem; align-items: start;
+    transition: border-color 0.2s, background 0.2s;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .entry-card:hover { background: var(--surface); }
+
+  .entry-card[data-type="gi"]       { border-left-color: var(--belt-blue); }
+  .entry-card[data-type="nogi"]     { border-left-color: var(--belt-purple); }
+  .entry-card[data-type="comp"]     { border-left-color: var(--belt-red); }
+  .entry-card[data-type="drilling"] { border-left-color: var(--belt-green); }
+  .entry-card[data-type="open-mat"] { border-left-color: var(--belt-orange); }
+  .entry-card:hover { border-left-color: var(--belt-yellow) !important; }
+
+  .entry-date-block { text-align: center; min-width: 52px; }
+  .entry-date-block .day { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; line-height: 1; color: var(--belt-yellow); }
+  .entry-date-block .month { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em; color: var(--text-dim); text-transform: uppercase; }
+  .entry-date-block .year { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--text-faint); }
+
+  .entry-row1 { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+
+  .entry-type-tag {
+    font-family: 'DM Mono', monospace; font-size: 0.58rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 0.2rem 0.5rem; border: 1px solid; line-height: 1.4;
+  }
+  .entry-type-tag.gi       { color: var(--belt-blue);   border-color: var(--belt-blue); }
+  .entry-type-tag.nogi     { color: var(--belt-purple); border-color: var(--belt-purple); }
+  .entry-type-tag.comp     { color: var(--belt-red);    border-color: var(--belt-red); }
+  .entry-type-tag.drilling { color: var(--belt-green);  border-color: var(--belt-green); }
+  .entry-type-tag.open-mat { color: var(--belt-orange); border-color: var(--belt-orange); }
+
+  .entry-title { font-family: 'Crimson Pro', serif; font-size: 1.15rem; font-weight: 600; color: var(--text); }
+
+  .entry-meta {
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    color: var(--text-dim); letter-spacing: 0.05em; margin-bottom: 0.5rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+  }
+
+  .entry-notes { font-size: 0.95rem; color: var(--text-dim); font-style: italic; line-height: 1.5; }
+
+  .entry-stars { color: var(--belt-yellow); font-size: 0.7rem; letter-spacing: 0.1em; }
+  .entry-stars .empty { color: var(--text-faint); }
+
+  .entry-actions { display: flex; gap: 0.4rem; align-self: start; }
+
+  .icon-btn { background: none; border: none; color: var(--text-faint); cursor: pointer; font-size: 0.85rem; padding: 0.3rem; transition: color 0.15s; line-height: 1; }
+  .icon-btn:hover { color: var(--belt-yellow); }
+  .icon-btn.del:hover { color: var(--belt-red); }
+
+  /* ── RESULT BADGES ── */
+  .result-badge { display: inline-block; font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.1em; padding: 0.1rem 0.6rem; }
+  .result-badge.gold   { background: var(--belt-yellow); color: var(--mat); }
+  .result-badge.silver { background: #AAA;               color: var(--mat); }
+  .result-badge.bronze { background: var(--belt-orange); color: var(--mat); }
+  .result-badge.loss   { background: var(--surface-hi);  color: var(--text-dim); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 5rem 2rem; color: var(--text-faint); }
+  .empty-glyph { font-family: 'Bebas Neue', sans-serif; font-size: 6rem; color: var(--surface); line-height: 1; margin-bottom: 0.5rem; }
+  .empty-msg   { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; }
+
+  /* ── BELT PROGRESS: white / blue / purple / brown / black only ── */
+  .belt-bar-wrap {
+    margin: 0 0 2.5rem;
+    background: var(--mat-mid);
+    border: 1px solid var(--surface);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .belt-bar-label {
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim);
+    margin-bottom: 0.75rem; display: flex; justify-content: space-between;
+  }
+
+  .belt-segments { display: flex; height: 10px; gap: 2px; margin-bottom: 0.5rem; }
+
+  .belt-seg { flex: 1; transition: opacity 0.3s; }
+  .belt-seg.earned   { opacity: 1; }
+  .belt-seg.unearned { opacity: 0.15; }
+
+  /* Only 5 belt colors in the progress bar */
+  .belt-seg[data-color="white"]  { background: #F5F0E8; }
+  .belt-seg[data-color="blue"]   { background: #2B5FA6; }
+  .belt-seg[data-color="purple"] { background: #6B3FA0; }
+  .belt-seg[data-color="brown"]  { background: #6B3A2A; }
+  .belt-seg[data-color="black"]  { background: #3A3530; border: 1px solid rgba(255,255,255,0.08); }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px; background: var(--surface); border: 1px solid var(--surface);
+    margin-bottom: 2rem;
+  }
+  .stats-cell { background: var(--mat-mid); padding: 1.25rem 1.5rem; text-align: center; }
+  .stats-num  { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; line-height: 1; color: var(--belt-yellow); margin-bottom: 0.2rem; }
+  .stats-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim); }
+
+  .type-breakdown { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; }
+  .type-chip { display: flex; align-items: center; gap: 0.5rem; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; color: var(--text-dim); }
+  .type-dot  { width: 10px; height: 10px; flex-shrink: 0; }
+
+  /* ── HEAT MAP ── */
+  .heatmap-title { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.75rem; }
+  .heatmap { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 2rem; }
+  .hm-day { width: 14px; height: 14px; background: var(--surface); transition: background 0.2s; }
+  .hm-day[data-count="1"] { background: color-mix(in srgb, var(--belt-yellow) 30%, var(--surface)); }
+  .hm-day[data-count="2"] { background: color-mix(in srgb, var(--belt-yellow) 60%, var(--surface)); }
+  .hm-day[data-count="3"] { background: var(--belt-yellow); }
+
+  /* ── TECH TAGS ── */
+  .tech-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+  .tech-tag  { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.15rem 0.5rem; background: var(--surface); color: var(--text-dim); border: 1px solid var(--surface-hi); }
+
+  /* ── COMP RECORD ── */
+  .record-display { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.08em; color: var(--text); margin-bottom: 0.3rem; }
+  .record-display span.win  { color: var(--belt-yellow); }
+  .record-display span.loss { color: var(--belt-red); }
+  .record-display span.sep  { color: var(--text-faint); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--mat); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-hi); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+  @media (max-width: 640px) {
+    .logo-oss { font-size: 3.5rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+    .entry-card { grid-template-columns: auto 1fr; }
+    .entry-actions { grid-column: 1 / -1; justify-content: flex-end; }
+    .header-stats { gap: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="belt-stripe"></div>
+
+<header>
+  <div class="logo-block">
+    <div class="logo-oss">OSS</div>
+    <div class="logo-sub">Brazilian Jiu-Jitsu — Training Log</div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill"><div class="num" id="stat-total">0</div><div class="lbl">Sessions</div></div>
+    <div class="stat-pill"><div class="num" id="stat-mins">0</div><div class="lbl">Hours</div></div>
+    <div class="stat-pill"><div class="num" id="stat-comps">0</div><div class="lbl">Comps</div></div>
+    <div class="stat-pill"><div class="num" id="stat-streak">0</div><div class="lbl">Day Streak</div></div>
+  </div>
+</header>
+
+<nav class="tabs-bar">
+  <button class="tab-btn active" data-tab="log">Training Log</button>
+  <button class="tab-btn" data-tab="comps">Competitions</button>
+  <button class="tab-btn" data-tab="stats">Stats</button>
+</nav>
+
+<main class="main">
+
+  <!-- LOG TAB -->
+  <div id="tab-log" class="tab-panel active">
+
+    <div class="belt-bar-wrap">
+      <div class="belt-bar-label">
+        <span>Belt Progress Tracker</span>
+        <span id="belt-current-label">White Belt</span>
+      </div>
+      <!-- 5 segments: white / blue / purple / brown / black -->
+      <div class="belt-segments" id="belt-segments">
+        <div class="belt-seg" data-color="white"></div>
+        <div class="belt-seg" data-color="blue"></div>
+        <div class="belt-seg" data-color="purple"></div>
+        <div class="belt-seg" data-color="brown"></div>
+        <div class="belt-seg" data-color="black"></div>
+      </div>
+      <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+        <label style="font-size:0.62rem; letter-spacing:0.2em;">CURRENT BELT:</label>
+        <select id="belt-select" style="width:auto; font-size:0.75rem; padding:0.35rem 0.7rem;">
+          <option value="0">White</option>
+          <option value="1">Blue</option>
+          <option value="2">Purple</option>
+          <option value="3">Brown</option>
+          <option value="4">Black</option>
+        </select>
+        <label style="font-size:0.62rem; letter-spacing:0.2em; margin-left:1rem;">STRIPES:</label>
+        <select id="stripe-select" style="width:auto; font-size:0.75rem; padding:0.35rem 0.7rem;">
+          <option value="0">0</option><option value="1">1</option>
+          <option value="2">2</option><option value="3">3</option><option value="4">4</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <div class="section-title">Practice Sessions</div>
+      <button class="btn" onclick="openModal('practice')">+ Log Session</button>
+    </div>
+
+    <div class="entries-list" id="practice-list">
+      <div class="empty-state" id="practice-empty">
+        <div class="empty-glyph">OSS</div>
+        <div class="empty-msg">No sessions logged yet. Step onto the mat.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPS TAB -->
+  <div id="tab-comps" class="tab-panel">
+    <div class="section-head">
+      <div>
+        <div class="section-title">Competitions</div>
+        <div id="comp-record" class="record-display" style="margin-top:0.25rem;">
+          <span class="win">0</span><span class="sep"> - </span><span class="loss">0</span>
+        </div>
+      </div>
+      <button class="btn" onclick="openModal('comp')">+ Log Competition</button>
+    </div>
+    <div class="entries-list" id="comp-list">
+      <div class="empty-state" id="comp-empty">
+        <div class="empty-glyph">🥋</div>
+        <div class="empty-msg">No competitions logged yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS TAB -->
+  <div id="tab-stats" class="tab-panel">
+    <div class="section-title" style="margin-bottom:1.5rem;">Overview</div>
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stats-cell"><div class="stats-num" id="s-total">0</div><div class="stats-label">Total Sessions</div></div>
+      <div class="stats-cell"><div class="stats-num" id="s-hours">0</div><div class="stats-label">Hours on Mat</div></div>
+      <div class="stats-cell"><div class="stats-num" id="s-avg">0</div><div class="stats-label">Avg Min/Session</div></div>
+      <div class="stats-cell"><div class="stats-num" id="s-wins">0</div><div class="stats-label">Competition Wins</div></div>
+      <div class="stats-cell"><div class="stats-num" id="s-month">0</div><div class="stats-label">Sessions This Month</div></div>
+      <div class="stats-cell"><div class="stats-num" id="s-streak2">0</div><div class="stats-label">Day Streak</div></div>
+    </div>
+
+    <div class="type-breakdown" id="type-breakdown"></div>
+
+    <div style="margin-top:2.5rem;">
+      <div class="heatmap-title">Activity — Last 90 Days</div>
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- PRACTICE MODAL -->
+<div class="modal-overlay" id="modal-practice">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Log Session</div>
+      <button class="modal-close" onclick="closeModal('practice')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Date</label><input type="date" id="p-date" /></div>
+        <div class="form-group"><label>Session Type</label>
+          <select id="p-type">
+            <option value="gi">Gi</option>
+            <option value="nogi">No-Gi</option>
+            <option value="drilling">Drilling</option>
+            <option value="open-mat">Open Mat</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Duration (minutes)</label><input type="number" id="p-mins" placeholder="90" min="1" max="480" /></div>
+        <div class="form-group"><label>Instructor / School</label><input type="text" id="p-school" placeholder="e.g. Prof. Silva" /></div>
+        <div class="form-group full"><label>Techniques Worked (comma-separated)</label><input type="text" id="p-techs" placeholder="armbar, triangle, de la riva..." /></div>
+        <div class="form-group full"><label>Notes</label><textarea id="p-notes" placeholder="What went well? What needs work?"></textarea></div>
+        <div class="form-group full">
+          <label>Session Rating</label>
+          <div class="star-rating">
+            <input type="radio" name="p-stars" id="ps5" value="5"><label for="ps5">★</label>
+            <input type="radio" name="p-stars" id="ps4" value="4"><label for="ps4">★</label>
+            <input type="radio" name="p-stars" id="ps3" value="3" checked><label for="ps3">★</label>
+            <input type="radio" name="p-stars" id="ps2" value="2"><label for="ps2">★</label>
+            <input type="radio" name="p-stars" id="ps1" value="1"><label for="ps1">★</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeModal('practice')">Cancel</button>
+        <button class="btn" onclick="saveEntry('practice')">Save Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMP MODAL -->
+<div class="modal-overlay" id="modal-comp">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Log Competition</div>
+      <button class="modal-close" onclick="closeModal('comp')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Date</label><input type="date" id="c-date" /></div>
+        <div class="form-group"><label>Tournament Name</label><input type="text" id="c-name" placeholder="e.g. IBJJF Boston Open" /></div>
+        <div class="form-group"><label>Division</label><input type="text" id="c-division" placeholder="e.g. Adult Blue Belt Middle" /></div>
+        <div class="form-group"><label>Result</label>
+          <select id="c-result">
+            <option value="gold">🥇 Gold</option>
+            <option value="silver">🥈 Silver</option>
+            <option value="bronze">🥉 Bronze</option>
+            <option value="loss">Did Not Place</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Wins</label><input type="number" id="c-wins" placeholder="0" min="0" /></div>
+        <div class="form-group"><label>Losses</label><input type="number" id="c-losses" placeholder="0" min="0" /></div>
+        <div class="form-group full"><label>Notes / Match Summary</label><textarea id="c-notes" placeholder="How did the matches go? Key moments?"></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeModal('comp')">Cancel</button>
+        <button class="btn" onclick="saveEntry('comp')">Save Competition</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem('bjj-data') || '{"practices":[],"comps":[],"belt":0,"stripes":0}');
+function save() { localStorage.setItem('bjj-data', JSON.stringify(data)); }
+
+// TABS
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'stats') renderStats();
+  });
+});
+
+// MODALS
+function openModal(type) {
+  if (type === 'practice') {
+    document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('p-mins').value = '';
+    document.getElementById('p-notes').value = '';
+    document.getElementById('p-techs').value = '';
+    document.getElementById('p-school').value = '';
+    document.querySelector('input[name="p-stars"][value="3"]').checked = true;
+  } else {
+    document.getElementById('c-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('c-name').value = '';
+    document.getElementById('c-division').value = '';
+    document.getElementById('c-wins').value = '';
+    document.getElementById('c-losses').value = '';
+    document.getElementById('c-notes').value = '';
+  }
+  document.getElementById('modal-' + type).classList.add('open');
+}
+
+function closeModal(type) { document.getElementById('modal-' + type).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// SAVE
+function saveEntry(type) {
+  if (type === 'practice') {
+    const date = document.getElementById('p-date').value;
+    if (!date) return;
+    data.practices.unshift({
+      id: Date.now(), date,
+      type:   document.getElementById('p-type').value,
+      mins:   parseInt(document.getElementById('p-mins').value) || 60,
+      school: document.getElementById('p-school').value.trim(),
+      techs:  document.getElementById('p-techs').value.split(',').map(t => t.trim()).filter(Boolean),
+      notes:  document.getElementById('p-notes').value.trim(),
+      stars:  parseInt(document.querySelector('input[name="p-stars"]:checked')?.value || 3)
+    });
+  } else {
+    const date = document.getElementById('c-date').value;
+    const name = document.getElementById('c-name').value.trim();
+    if (!date || !name) return;
+    data.comps.unshift({
+      id: Date.now(), date, name,
+      division: document.getElementById('c-division').value.trim(),
+      result:   document.getElementById('c-result').value,
+      wins:     parseInt(document.getElementById('c-wins').value)   || 0,
+      losses:   parseInt(document.getElementById('c-losses').value) || 0,
+      notes:    document.getElementById('c-notes').value.trim()
+    });
+  }
+  save(); closeModal(type); renderAll();
+}
+
+function deleteEntry(type, id) {
+  if (!confirm('Delete this entry?')) return;
+  if (type === 'practice') data.practices = data.practices.filter(e => e.id !== id);
+  else data.comps = data.comps.filter(e => e.id !== id);
+  save(); renderAll();
+}
+
+// HELPERS
+function fmtDate(str) {
+  const d = new Date(str + 'T12:00:00');
+  return { day: d.getDate().toString().padStart(2,'0'), month: d.toLocaleString('default',{month:'short'}).toUpperCase(), year: d.getFullYear() };
+}
+
+function renderStars(n) {
+  let s = '';
+  for (let i=1;i<=5;i++) s += i<=n ? '★' : '<span class="empty">★</span>';
+  return `<div class="entry-stars">${s}</div>`;
+}
+
+function calcStreak() {
+  if (!data.practices.length) return 0;
+  const dates = [...new Set(data.practices.map(e=>e.date))].sort().reverse();
+  const today = new Date().toISOString().split('T')[0];
+  let streak=0, check=today;
+  for (const d of dates) {
+    if (d===check) { streak++; const p=new Date(check+'T12:00:00'); p.setDate(p.getDate()-1); check=p.toISOString().split('T')[0]; }
+    else if (d<check) break;
+  }
+  return streak;
+}
+
+// RENDER PRACTICES
+function renderPractices() {
+  const list = document.getElementById('practice-list');
+  if (!data.practices.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-glyph">OSS</div><div class="empty-msg">No sessions logged yet. Step onto the mat.</div></div>';
+    return;
+  }
+  list.innerHTML = '';
+  data.practices.forEach((e, i) => {
+    const d = fmtDate(e.date);
+    const metaParts = [e.mins ? e.mins+' min' : null, e.school||null].filter(Boolean);
+    const card = document.createElement('div');
+    card.className = 'entry-card'; card.dataset.type = e.type;
+    card.innerHTML = `
+      <div class="entry-date-block">
+        <div class="day">${d.day}</div><div class="month">${d.month}</div><div class="year">${d.year}</div>
+      </div>
+      <div class="entry-body">
+        <div class="entry-row1">
+          <span class="entry-type-tag ${e.type}">${e.type.replace('-',' ')}</span>
+          <span class="entry-title">${e.school || 'Training Session'}</span>
+        </div>
+        <div class="entry-meta">${metaParts.join(' · ')}</div>
+        ${renderStars(e.stars)}
+        ${e.notes ? `<div class="entry-notes">${e.notes}</div>` : ''}
+        ${e.techs?.length ? `<div class="tech-tags">${e.techs.map(t=>`<span class="tech-tag">${t}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="entry-actions"><button class="icon-btn del" onclick="deleteEntry('practice',${e.id})">✕</button></div>`;
+    list.appendChild(card);
+  });
+}
+
+// RENDER COMPS
+function renderComps() {
+  const list = document.getElementById('comp-list');
+  let tw=0, tl=0;
+  data.comps.forEach(e => { tw+=e.wins; tl+=e.losses; });
+  document.getElementById('comp-record').innerHTML =
+    `<span class="win">${tw}</span><span class="sep"> – </span><span class="loss">${tl}</span>`;
+  if (!data.comps.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-glyph">🥋</div><div class="empty-msg">No competitions logged yet.</div></div>';
+    return;
+  }
+  list.innerHTML = '';
+  const resultLabels = { gold:'🥇 GOLD', silver:'🥈 SILVER', bronze:'🥉 BRONZE', loss:'NO PLACE' };
+  data.comps.forEach(e => {
+    const d = fmtDate(e.date);
+    const card = document.createElement('div');
+    card.className='entry-card'; card.dataset.type='comp';
+    card.innerHTML = `
+      <div class="entry-date-block">
+        <div class="day">${d.day}</div><div class="month">${d.month}</div><div class="year">${d.year}</div>
+      </div>
+      <div class="entry-body">
+        <div class="entry-row1"><span class="entry-type-tag comp">comp</span><span class="entry-title">${e.name}</span></div>
+        <div class="entry-meta">${e.division ? e.division+' · ' : ''}${e.wins}W ${e.losses}L</div>
+        <div style="margin-bottom:0.4rem;"><span class="result-badge ${e.result}">${resultLabels[e.result]||e.result}</span></div>
+        ${e.notes ? `<div class="entry-notes">${e.notes}</div>` : ''}
+      </div>
+      <div class="entry-actions"><button class="icon-btn del" onclick="deleteEntry('comp',${e.id})">✕</button></div>`;
+    list.appendChild(card);
+  });
+}
+
+// RENDER STATS
+function renderStats() {
+  const total = data.practices.length;
+  const totalMins = data.practices.reduce((a,e)=>a+e.mins,0);
+  const avg = total ? Math.round(totalMins/total) : 0;
+  const now = new Date();
+  const thisMonth = data.practices.filter(e => {
+    const d=new Date(e.date+'T12:00:00');
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).length;
+  let tw=0; data.comps.forEach(e=>tw+=e.wins);
+
+  document.getElementById('s-total').textContent  = total;
+  document.getElementById('s-hours').textContent  = Math.round(totalMins/60);
+  document.getElementById('s-avg').textContent    = avg;
+  document.getElementById('s-wins').textContent   = tw;
+  document.getElementById('s-month').textContent  = thisMonth;
+  document.getElementById('s-streak2').textContent = calcStreak();
+
+  const types = {gi:0, nogi:0, drilling:0, 'open-mat':0};
+  data.practices.forEach(e => { if(types[e.type]!==undefined) types[e.type]++; });
+  const typeColors = {gi:'var(--belt-blue)', nogi:'var(--belt-purple)', drilling:'var(--belt-green)', 'open-mat':'var(--belt-orange)'};
+  document.getElementById('type-breakdown').innerHTML = Object.entries(types).map(([k,v]) =>
+    `<div class="type-chip"><div class="type-dot" style="background:${typeColors[k]}"></div>${k.replace('-',' ')}: ${v}</div>`
+  ).join('');
+
+  // Heatmap
+  const counts = {};
+  data.practices.forEach(e => counts[e.date]=(counts[e.date]||0)+1);
+  const hm = document.getElementById('heatmap'); hm.innerHTML='';
+  const today = new Date();
+  for(let i=89;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    const key=d.toISOString().split('T')[0];
+    const c=Math.min(counts[key]||0,3);
+    const cell=document.createElement('div'); cell.className='hm-day';
+    if(c) cell.dataset.count=c;
+    cell.title=key+(c?` (${c})`:'');
+    hm.appendChild(cell);
+  }
+}
+
+// HEADER STATS
+function updateHeaderStats() {
+  const mins = data.practices.reduce((a,e)=>a+e.mins,0);
+  document.getElementById('stat-total').textContent  = data.practices.length;
+  document.getElementById('stat-mins').textContent   = Math.round(mins/60);
+  document.getElementById('stat-comps').textContent  = data.comps.length;
+  document.getElementById('stat-streak').textContent = calcStreak();
+}
+
+// BELT
+const beltNames = ['White','Blue','Purple','Brown','Black'];
+
+document.getElementById('belt-select').addEventListener('change', function() { data.belt=parseInt(this.value); save(); renderBelt(); });
+document.getElementById('stripe-select').addEventListener('change', function() { data.stripes=parseInt(this.value); save(); renderBelt(); });
+
+function renderBelt() {
+  const segs = document.querySelectorAll('.belt-seg');
+  segs.forEach((seg,i) => { seg.classList.toggle('earned',i<=data.belt); seg.classList.toggle('unearned',i>data.belt); });
+  document.getElementById('belt-current-label').textContent =
+    `${beltNames[data.belt]} Belt${data.stripes>0?' · '+data.stripes+' Stripe'+(data.stripes>1?'s':''):''}`;
+  document.getElementById('belt-select').value = data.belt;
+  document.getElementById('stripe-select').value = data.stripes;
+}
+
+function renderAll() { renderPractices(); renderComps(); updateHeaderStats(); renderBelt(); }
+renderAll();
+</script>
+</body>
+</html>
