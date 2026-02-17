@@ -655,7 +655,7 @@ function renderPractices() {
   list.innerHTML = '';
   data.practices.forEach((e, i) => {
     const d = fmtDate(e.date);
-    const meta = [e.mins ? e.mins + ' min' : null].filter(Boolean);
+    const metaParts = [e.mins ? e.mins+' min' : null, e.school||null].filter(Boolean);
     const card = document.createElement('div');
     card.className = 'entry-card'; card.dataset.type = e.type;
     card.innerHTML = `
