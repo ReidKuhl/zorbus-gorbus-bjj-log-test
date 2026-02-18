@@ -391,12 +391,21 @@
 </head>
 <body>
 
-<!-- SIMPLE ENTER SCREEN -->
+<!-- PASSWORD SCREEN -->
 <div id="auth-screen">
   <div class="auth-box">
     <div class="auth-top"><div class="auth-logo">OSS</div><div class="auth-tagline">BJJ Training Log</div></div>
-    <div class="auth-form" style="text-align:center; padding: 2.5rem;">
-      <button class="auth-submit" onclick="enterApp()" style="font-size:0.8rem; letter-spacing:0.3em;">ENTER THE MAT</button>
+    <div class="auth-form" style="padding: 2rem 2.5rem 2.5rem;">
+      <div class="form-group" style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem;">
+        <label>Name</label>
+        <input type="text" id="gate-name" placeholder="e.g. Marcus Silva" autocomplete="name" onkeydown="if(event.key==='Enter') document.getElementById('gate-pass').focus()">
+      </div>
+      <div class="form-group" style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1rem;">
+        <label>Password</label>
+        <input type="password" id="gate-pass" placeholder="············" autocomplete="current-password" onkeydown="if(event.key==='Enter') enterApp()">
+      </div>
+      <div class="auth-error" id="gate-error"></div>
+      <button class="auth-submit" onclick="enterApp()" style="margin-top:0.25rem;">ENTER THE MAT</button>
     </div>
   </div>
 </div>
@@ -609,6 +618,17 @@ function genId() { return Date.now().toString(36) + Math.random().toString(36).s
 function serverTimestamp() { return new Date().toISOString(); }
 
 window.enterApp = function() {
+  const name = document.getElementById('gate-name').value.trim();
+  const pass = document.getElementById('gate-pass').value;
+  const err = document.getElementById('gate-error');
+  if (pass !== 'flobjj') {
+    err.textContent = 'Incorrect password.';
+    document.getElementById('gate-pass').value = '';
+    document.getElementById('gate-pass').focus();
+    return;
+  }
+  err.textContent = '';
+  document.getElementById('user-display-name').textContent = name || 'Practitioner';
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('app-shell').classList.remove('hidden');
   loadAllData();
