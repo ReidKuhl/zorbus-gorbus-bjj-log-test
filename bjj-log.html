@@ -419,15 +419,11 @@
     <div class="logo-oss">OSS</div>
     <div class="logo-sub">Brazilian Jiu-Jitsu — Training Log</div>
   </div>
-  <div class="header-stats">
+  <div class="header-stats" style="margin-left:auto;">
     <div class="stat-pill"><div class="num" id="stat-total">0</div><div class="lbl">Sessions</div></div>
-    <div class="stat-pill"><div class="num" id="stat-mins">0</div><div class="lbl">Hours</div></div>
     <div class="stat-pill"><div class="num" id="stat-comps">0</div><div class="lbl">Comps</div></div>
-    <div class="stat-pill"><div class="num" id="stat-streak">0</div><div class="lbl">Day Streak</div></div>
   </div>
-  <div class="user-menu">
-    <div class="user-name" id="user-display-name">Practitioner</div>
-  </div>
+  <div id="user-display-name" style="display:none;">Practitioner</div>
 </header>
 
 <nav class="tabs-bar">
@@ -548,16 +544,7 @@
         <div class="form-group"><label>School</label><input type="text" id="p-school" placeholder="flobjj"/></div>
         <div class="form-group full"><label>Techniques Worked (comma-separated)</label><input type="text" id="p-techs" placeholder="armbar, triangle, de la riva..." /></div>
         <div class="form-group full"><label>Notes</label><textarea id="p-notes" placeholder="What went well? What needs work?"></textarea></div>
-        <div class="form-group full">
-          <label>Session Rating</label>
-          <div class="star-rating">
-            <input type="radio" name="p-stars" id="ps5" value="5"><label for="ps5">★</label>
-            <input type="radio" name="p-stars" id="ps4" value="4"><label for="ps4">★</label>
-            <input type="radio" name="p-stars" id="ps3" value="3" checked><label for="ps3">★</label>
-            <input type="radio" name="p-stars" id="ps2" value="2"><label for="ps2">★</label>
-            <input type="radio" name="p-stars" id="ps1" value="1"><label for="ps1">★</label>
-          </div>
-        </div>
+
       </div>
       <div class="form-actions">
         <button class="btn btn-ghost" onclick="closeModal('practice')">Cancel</button>
@@ -651,7 +638,6 @@ window.openModal = function(type) {
   if (type==='practice') {
     document.getElementById('p-date').value=today;
     ['p-mins','p-notes','p-techs','p-school'].forEach(id=>document.getElementById(id).value='');
-    document.querySelector('input[name="p-stars"][value="3"]').checked=true;
   } else {
     document.getElementById('c-date').value=today;
     ['c-name','c-division','c-wins','c-losses','c-notes'].forEach(id=>document.getElementById(id).value='');
@@ -730,9 +716,9 @@ function renderPractices() {
     card.innerHTML=`
       <div class="entry-date-block"><div class="day">${d.day}</div><div class="month">${d.month}</div><div class="year">${d.year}</div></div>
       <div class="entry-body">
-        <div class="entry-row1"><span class="entry-type-tag ${e.type}">${e.type.replace('-',' ')}</span><span class="entry-title">Training Session</span></div>
+        <div class="entry-row1"><span class="entry-type-tag ${e.type}">${e.type.replace('-',' ')}</span><span class="entry-title">${document.getElementById('user-display-name').textContent.toLowerCase()}</span></div>
         <div class="entry-meta">${meta.join(' &middot; ')}</div>
-        ${renderStars(e.stars)}
+
         ${e.notes?`<div class="entry-notes">${e.notes}</div>`:''}
         ${e.techs?.length?`<div class="tech-tags">${e.techs.map(t=>`<span class="tech-tag">${t}</span>`).join('')}</div>`:''}
       </div>
@@ -780,9 +766,8 @@ function renderStats() {
 }
 
 function updateHeaderStats() {
-  const mins=practices.reduce((a,e)=>a+e.mins,0);
-  document.getElementById('stat-total').textContent=practices.length; document.getElementById('stat-mins').textContent=Math.round(mins/60);
-  document.getElementById('stat-comps').textContent=comps.length; document.getElementById('stat-streak').textContent=calcStreak();
+  document.getElementById('stat-total').textContent=practices.length;
+  document.getElementById('stat-comps').textContent=comps.length;
 }
 
 const beltNames=['White','Blue','Purple','Brown','Black'];
