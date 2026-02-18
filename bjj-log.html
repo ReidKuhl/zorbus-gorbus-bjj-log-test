@@ -391,30 +391,12 @@
 </head>
 <body>
 
-<!---->
+<!-- SIMPLE ENTER SCREEN -->
 <div id="auth-screen">
   <div class="auth-box">
     <div class="auth-top"><div class="auth-logo">OSS</div><div class="auth-tagline">BJJ Training Log</div></div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-signin-btn" onclick="switchAuthTab('signin')">Sign In</button>
-      <button class="auth-tab" id="tab-signup-btn" onclick="switchAuthTab('signup')">Create Account</button>
-    </div>
-    <div id="signin-form" class="auth-form">
-      <div class="form-group"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com" autocomplete="email"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="si-pass" placeholder="&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;" autocomplete="current-password"></div>
-      <button class="auth-submit" id="si-btn" onclick="doSignIn()">Sign In</button>
-      <div class="auth-error" id="si-error"></div>
-      <div class="auth-divider"><span>or</span></div>
-      <button class="google-btn" onclick="doGoogleSignIn()"><svg class="google-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Continue with Google</button>
-    </div>
-    <div id="signup-form" class="auth-form" style="display:none;">
-      <div class="form-group"><label>Display Name</label><input type="text" id="su-name" placeholder="e.g. Marcus Silva" autocomplete="name"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="su-email" placeholder="you@example.com" autocomplete="email"></div>
-      <div class="form-group"><label>Password (min 6 chars)</label><input type="password" id="su-pass" placeholder="&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;&#xB7;" autocomplete="new-password"></div>
-      <button class="auth-submit" id="su-btn" onclick="doSignUp()">Create Account</button>
-      <div class="auth-error" id="su-error"></div>
-      <div class="auth-divider"><span>or</span></div>
-      <button class="google-btn" onclick="doGoogleSignIn()"><svg class="google-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Continue with Google</button>
+    <div class="auth-form" style="text-align:center; padding: 2.5rem;">
+      <button class="auth-submit" onclick="enterApp()" style="font-size:0.8rem; letter-spacing:0.3em;">ENTER THE MAT</button>
     </div>
   </div>
 </div>
@@ -435,8 +417,7 @@
     <div class="stat-pill"><div class="num" id="stat-streak">0</div><div class="lbl">Day Streak</div></div>
   </div>
   <div class="user-menu">
-    <div class="user-name" id="user-display-name">--</div>
-    <button class="signout-btn" onclick="doSignOut()">Sign Out</button>
+    <div class="user-name" id="user-display-name">Practitioner</div>
   </div>
 </header>
 
@@ -609,104 +590,31 @@
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-         updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc,
-         setDoc, getDoc, query, orderBy, serverTimestamp }
-  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+<script>
+// LocalStorage-based data layer (no Firebase)
+let practices = [], comps = [], beltData = { belt:0, stripes:0 };
 
-// === PASTE YOUR FIREBASE CONFIG HERE ===
-const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_API_KEY_HERE",
-  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
-  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
-  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID_HERE",
-  appId:             "PASTE_YOUR_APP_ID_HERE"
-};
-// =======================================
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
-
-let currentUser = null, practices = [], comps = [], beltData = { belt:0, stripes:0 };
-
-const practicesRef = () => collection(db, 'users', currentUser.uid, 'practices');
-const compsRef     = () => collection(db, 'users', currentUser.uid, 'comps');
-const profileRef   = () => doc(db, 'users', currentUser.uid, 'meta', 'profile');
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('app-shell').classList.remove('hidden');
-    document.getElementById('user-display-name').textContent = user.displayName || user.email.split('@')[0];
-    await loadAllData();
-  } else {
-    currentUser = null; practices = []; comps = [];
-    document.getElementById('auth-screen').classList.remove('hidden');
-    document.getElementById('app-shell').classList.add('hidden');
-  }
-});
-
-async function loadAllData() {
-  try { const s = await getDoc(profileRef()); if (s.exists()) beltData = s.data(); } catch(_) {}
-  try { const s = await getDocs(query(practicesRef(), orderBy('date','desc'))); practices = s.docs.map(d=>({id:d.id,...d.data()})); } catch(_) { practices=[]; }
-  try { const s = await getDocs(query(compsRef(), orderBy('date','desc'))); comps = s.docs.map(d=>({id:d.id,...d.data()})); } catch(_) { comps=[]; }
+function loadAllData() {
+  try { beltData = JSON.parse(localStorage.getItem('bjj-belt') || '{"belt":0,"stripes":0}'); } catch(_) {}
+  try { practices = JSON.parse(localStorage.getItem('bjj-practices') || '[]'); } catch(_) { practices=[]; }
+  try { comps = JSON.parse(localStorage.getItem('bjj-comps') || '[]'); } catch(_) { comps=[]; }
   renderAll();
 }
 
-window.switchAuthTab = function(tab) {
-  document.getElementById('signin-form').style.display = tab==='signin'?'block':'none';
-  document.getElementById('signup-form').style.display = tab==='signup'?'block':'none';
-  document.getElementById('tab-signin-btn').classList.toggle('active', tab==='signin');
-  document.getElementById('tab-signup-btn').classList.toggle('active', tab==='signup');
-  document.getElementById('si-error').textContent = document.getElementById('su-error').textContent = '';
+function savePractices() { localStorage.setItem('bjj-practices', JSON.stringify(practices)); }
+function saveComps()     { localStorage.setItem('bjj-comps', JSON.stringify(comps)); }
+function saveBeltLS()    { localStorage.setItem('bjj-belt', JSON.stringify(beltData)); }
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function serverTimestamp() { return new Date().toISOString(); }
+
+window.enterApp = function() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-shell').classList.remove('hidden');
+  loadAllData();
 };
 
-window.doSignIn = async function() {
-  const email=document.getElementById('si-email').value.trim(), pass=document.getElementById('si-pass').value;
-  const btn=document.getElementById('si-btn'), err=document.getElementById('si-error');
-  err.textContent='';
-  if (!email||!pass) { err.textContent='Please fill in all fields.'; return; }
-  btn.disabled=true; btn.textContent='Signing in...';
-  try { await signInWithEmailAndPassword(auth, email, pass); }
-  catch(e) { err.textContent=friendlyError(e.code); btn.disabled=false; btn.textContent='Sign In'; }
-};
 
-window.doSignUp = async function() {
-  const name=document.getElementById('su-name').value.trim(), email=document.getElementById('su-email').value.trim(), pass=document.getElementById('su-pass').value;
-  const btn=document.getElementById('su-btn'), err=document.getElementById('su-error');
-  err.textContent='';
-  if (!name||!email||!pass) { err.textContent='Please fill in all fields.'; return; }
-  if (pass.length<6) { err.textContent='Password must be at least 6 characters.'; return; }
-  btn.disabled=true; btn.textContent='Creating account...';
-  try { const c=await createUserWithEmailAndPassword(auth, email, pass); await updateProfile(c.user, {displayName:name}); }
-  catch(e) { err.textContent=friendlyError(e.code); btn.disabled=false; btn.textContent='Create Account'; }
-};
-
-window.doGoogleSignIn = async function() {
-  try { await signInWithPopup(auth, googleProvider); }
-  catch(e) { const m=friendlyError(e.code); document.getElementById('si-error').textContent=document.getElementById('su-error').textContent=m; }
-};
-
-window.doSignOut = async function() { await signOut(auth); };
-
-document.getElementById('si-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') window.doSignIn(); });
-document.getElementById('su-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') window.doSignUp(); });
-
-function friendlyError(code) {
-  return {'auth/user-not-found':'No account with that email.','auth/wrong-password':'Incorrect password.',
-    'auth/email-already-in-use':'That email is already registered.','auth/invalid-email':'Enter a valid email.',
-    'auth/weak-password':'Password must be 6+ characters.','auth/too-many-requests':'Too many attempts. Try later.',
-    'auth/invalid-credential':'Invalid email or password.','auth/popup-closed-by-user':'Sign-in cancelled.',
-    'auth/network-request-failed':'Network error.'}[code] || 'Something went wrong.';
-}
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -733,40 +641,40 @@ window.openModal = function(type) {
 window.closeModal = function(type) { document.getElementById('modal-'+type).classList.remove('open'); };
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
 
-window.saveEntry = async function(type) {
+window.saveEntry = function(type) {
   if (type==='practice') {
     const date=document.getElementById('p-date').value; if(!date) return;
-    const entry={date, type:document.getElementById('p-type').value,
+    const entry={id:genId(), date, type:document.getElementById('p-type').value,
       mins:parseInt(document.getElementById('p-mins').value)||60,
       school:document.getElementById('p-school').value.trim(),
       techs:document.getElementById('p-techs').value.split(',').map(t=>t.trim()).filter(Boolean),
       notes:document.getElementById('p-notes').value.trim(),
       stars:parseInt(document.querySelector('input[name="p-stars"]:checked')?.value||3),
       createdAt:serverTimestamp()};
-    const ref=await addDoc(practicesRef(), entry); practices.unshift({id:ref.id,...entry});
+    practices.unshift(entry); savePractices();
   } else {
     const date=document.getElementById('c-date').value, name=document.getElementById('c-name').value.trim();
     if(!date||!name) return;
-    const entry={date, name, division:document.getElementById('c-division').value.trim(),
+    const entry={id:genId(), date, name, division:document.getElementById('c-division').value.trim(),
       result:document.getElementById('c-result').value,
       wins:parseInt(document.getElementById('c-wins').value)||0,
       losses:parseInt(document.getElementById('c-losses').value)||0,
       notes:document.getElementById('c-notes').value.trim(), createdAt:serverTimestamp()};
-    const ref=await addDoc(compsRef(), entry); comps.unshift({id:ref.id,...entry});
+    comps.unshift(entry); saveComps();
   }
   closeModal(type); renderAll();
 };
 
-window.deleteEntry = async function(type, id) {
+window.deleteEntry = function(type, id) {
   if(!confirm('Delete this entry?')) return;
-  if(type==='practice') { await deleteDoc(doc(db,'users',currentUser.uid,'practices',id)); practices=practices.filter(e=>e.id!==id); }
-  else { await deleteDoc(doc(db,'users',currentUser.uid,'comps',id)); comps=comps.filter(e=>e.id!==id); }
+  if(type==='practice') { practices=practices.filter(e=>e.id!==id); savePractices(); }
+  else { comps=comps.filter(e=>e.id!==id); saveComps(); }
   renderAll();
 };
 
-window.saveBelt = async function() {
+window.saveBelt = function() {
   beltData={belt:parseInt(document.getElementById('belt-select').value), stripes:parseInt(document.getElementById('stripe-select').value)};
-  await setDoc(profileRef(), beltData); renderBelt();
+  saveBeltLS(); renderBelt();
 };
 document.getElementById('belt-select').addEventListener('change', window.saveBelt);
 document.getElementById('stripe-select').addEventListener('change', window.saveBelt);
